@@ -13,7 +13,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true
 })
 .then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+.catch(err => console.log("MongoDB connection error:", err));
 
 // Todo schema
 const TodoSchema = new mongoose.Schema({
@@ -25,31 +25,48 @@ const Todo = mongoose.model("Todo", TodoSchema);
 
 // Routes
 app.get("/todos", async (req, res) => {
-  const todos = await Todo.find();
-  res.json(todos);
+  try {
+    const todos = await Todo.find();
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/todos", async (req, res) => {
-  const newTodo = new Todo({
-    text: req.body.text,
-    done: false
-  });
-  await newTodo.save();
-  res.json(newTodo);
+  try {
+    const newTodo = new Todo({
+      text: req.body.text,
+      done: false
+    });
+    await newTodo.save();
+    res.json(newTodo);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.put("/todos/:id", async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
-  if (!todo) return res.status(404).send("Todo not found");
-  todo.done = !todo.done;
-  await todo.save();
-  res.json(todo);
+  try {
+    const todo = await Todo.findById(req.params.id);
+    if (!todo) return res.status(404).send("Todo not found");
+    todo.done = !todo.done;
+    await todo.save();
+    res.json(todo);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.delete("/todos/:id", async (req, res) => {
-  await Todo.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  try {
+    await Todo.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// Use Render's assigned port, fallback to 5000
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
