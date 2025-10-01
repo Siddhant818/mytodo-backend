@@ -24,14 +24,11 @@ const TodoSchema = new mongoose.Schema({
 const Todo = mongoose.model("Todo", TodoSchema);
 
 // Routes
-
-// Get all todos
 app.get("/todos", async (req, res) => {
   const todos = await Todo.find();
   res.json(todos);
 });
 
-// Add new todo
 app.post("/todos", async (req, res) => {
   const newTodo = new Todo({
     text: req.body.text,
@@ -41,7 +38,6 @@ app.post("/todos", async (req, res) => {
   res.json(newTodo);
 });
 
-// Toggle todo done
 app.put("/todos/:id", async (req, res) => {
   const todo = await Todo.findById(req.params.id);
   if (!todo) return res.status(404).send("Todo not found");
@@ -50,7 +46,6 @@ app.put("/todos/:id", async (req, res) => {
   res.json(todo);
 });
 
-// Delete todo
 app.delete("/todos/:id", async (req, res) => {
   await Todo.findByIdAndDelete(req.params.id);
   res.json({ message: "Deleted" });
